@@ -6,8 +6,11 @@ from snowflake.snowpark.functions import col
 cnx = st.connection("snowflake")
 session = cnx.session()  
 
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
+# my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
+# st.dataframe(data=my_dataframe, use container_width = True)
+# st.stop()
 
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'),col('SEARCH_ON'))
 
 # Write directly to the app
 st.title(f"🥤Custom Smoothies Order🥤")
@@ -32,8 +35,12 @@ if ingredient_list:
 
     for fruit_choosen in ingredient_list:
         ingredient_string += fruit_choosen+' '
+        search_on=pd_df.loc[pd_df['FRUIT_NAME'] == fruit_choosen, 'SEARCH_ON'].iloc[0]
+        # st.write('The search value for ', fruit_choosen,' is ', search_on, '.')
+      
         st.subheader(fruit_choosen + 'Nutrient_Inforamtion')
-        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_choosen)  
+      
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + search_on)  
         sf_df = st.dataframe(data= smoothiefroot_response.json(), use_container_width=True)
 
     my_insert_string = """insert into smoothies.public.orders(ingredients, NAME_ON_ORDER)
